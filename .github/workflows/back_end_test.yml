@@ -1,18 +1,52 @@
-name: Sonarqube
+# workflow의 이름
+name: backend-build-test
 
+# PR 요청에 대해
 on:
-  push:
-    branches:
-      - 'main'
   pull_request:
+    # 특정 브랜치만
     branches:
-      - 'main'
+      - main # develop 브랜치에서 pr 이벤트가 일어났을 때 실행
 
+
+# 실행 해야할 job
 jobs:
-  sonarqube:
-    runs-on: ubuntu-latest
 
+  ###### 아래부터 sonarqube와 관련있는 부분 시작
+  analysis:
+    # ubuntu 환경에서 실행 (환경은 github이 제공)
+    runs-on: ubuntu-latest
+    # 이 Job에서 사용할 환경변수
+    env:
+      # KEY - VALUE
+      SONARQUBE_ID: jujeol-pr
+      SONARQUBE_URL: 3.39.218.101:80
+      PR_NUMBER: ${{ github.event.pull_request.number }}
     steps:
-      - uses: actions/checkout@v3
-      - name: analysis
-        run: ./gradlew sonarqube -Dsonar.github.oauth=${{ secrets.SONAR_ACCESS_TOKEN }}
+      - name: Checkout source code
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          token: squ_e4012a0e9428914394dccbd9757579bab4c7f183
+
+        # 위에서 설정했던 정적코드 전송 태스크 실행
+      - name: Sonaqube Analysis
+        run: ./gradlew test sonarqube
+          -Dsonar.host.url=${{ env.SONARQUBE_URL }}
+          -Dsonar.projectKey=${{ env.SONARQUBE_ID }}
+          # project의 제목을 {프로젝트명}-{pr번호} 형식으로 
+          -Dsonar.projectName=${{ env.SONARQUBE_ID }}-${{ env.PR_NUMBER }}
+          -Dsonar.login=squ_e4012a0e9428914394dccbd9757579bab4c7f183
+
+      - name: Comment Sonarqube URL
+        uses: actions/github-script@v4
+        with:
+          # 이슈에 코멘트를 달아주는 스크립트 실행
+          script: |
+            const { SONARQUBE_ID, SONARQUBE_URL, PR_NUMBER } = process.env
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `📊 ${ SONARQUBE_ID }-${ PR_NUMBER } 분석 결과 확인하기 [링크](${SONARQUBE_URL})`
+            })
