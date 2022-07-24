@@ -15,5 +15,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: analysis
-        run: ./gradlew sonarqube -x test
-          #-Dsonar.github.oauth=${{ secrets.SONAR_ACCESS_TOKEN }}
+        run: ./gradlew sonarqube -Dsonar.github.oauth=${{ secrets.SONAR_ACCESS_TOKEN }}
