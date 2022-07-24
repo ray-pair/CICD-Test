@@ -15,8 +15,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: analysis
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: ./gradlew sonarqube -x test 
-          -Dsonar.github.pullRequest=${{ env.PR_NUMBER }}
+        run: ./gradlew sonarqube -x test
           #-Dsonar.github.oauth=${{ secrets.SONAR_ACCESS_TOKEN }}
