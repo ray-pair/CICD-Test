@@ -31,4 +31,5 @@ jobs:
       - name: analysis
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.SONAR_ACCESS_TOKEN }}
-        run: ./gradlew -Pprofile=ci sonarqube -x test -Dsonar.github.oauth=${{ env.GITHUB_ACCESS_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: ./gradlew -Pprofile=ci sonarqube -x test -Dsonar.github.oauth=${{ env.GITHUB_ACCESS_TOKEN }} -Dsonar.github.pullRequests=${{ env.PR_NUMBER }}
